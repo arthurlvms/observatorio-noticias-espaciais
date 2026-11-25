@@ -8,16 +8,6 @@ Quais veículos concentram a cobertura do setor espacial e onde um analista pode
 
 Na amostra de janeiro de 2025, a API retornou **534 matérias de 11 veículos**. NASA (181) e SpaceNews (168) somaram **65,4%** do acervo. As matérias continham 216 vínculos com lançamentos. A concentração descreve a seleção editorial da fonte e o período analisado. [Documentação da Spaceflight News API](https://api.spaceflightnewsapi.net/v4/docs/)
 
-## Como experimentar agora
-
-O ZIP inclui o banco da amostra em `data/observatorio.db`. Extraia o pacote, abra um terminal na pasta que contém este README e, com Python 3.11 ou superior, execute:
-
-```console
-python -m app.painel
-```
-
-Abra [o painel](http://127.0.0.1:8501), pesquise `lunar lander` e consulte **Engenharia**. Para encerrar o servidor use Ctrl+C. A aplicação usa a biblioteca padrão. Quem obtiver apenas os arquivos do Git pode recriar a amostra com os comandos de coleta e carga abaixo antes de iniciar o painel.
-
 ## Arquitetura e confiabilidade
 
 ```mermaid
@@ -107,7 +97,13 @@ Medição local em Windows com CPython 3.14.4, 534 documentos e 4.645 termos. Pa
 
 ## Execução completa com Airflow
 
-1. Use a pasta extraída do ZIP. Para obter uma cópia Git local, rode `git clone ./observatorio observatorio-t2` a partir da pasta que contém o projeto extraído e entre em `observatorio-t2`. Quando o projeto estiver publicado, substitua a origem local pela URL do repositório da dupla.
+1. Clone o repositório e abra a pasta do projeto.
+
+   ```console
+   git clone https://github.com/arthurlvms/observatorio-noticias-espaciais.git
+   cd observatorio-noticias-espaciais
+   ```
+
 2. Com Docker Engine e Compose v2 ativos em modo de contêineres Linux, encerre o painel Python local se estiver usando a porta 8501. Execute na pasta do projeto:
 
    ```console
@@ -129,7 +125,7 @@ Medição local em Windows com CPython 3.14.4, 534 documentos e 4.645 termos. Pa
    exit
    ```
 
-4. Na grade do Airflow, acompanhe `coletar_paginas` e depois `noticias_consolidacao → carregar_estrela`. Abra os logs. Repita a mesma janela e confira o total estável. O volume Docker começa independente do banco pré-carregado do ZIP. A execução diária pode acrescentar matérias de outras datas.
+4. Na grade do Airflow, acompanhe `coletar_paginas` e depois `noticias_consolidacao → carregar_estrela`. Abra os logs. Repita a mesma janela e confira o total estável. A execução diária pode acrescentar matérias de outras datas.
 5. Abra [o painel](http://localhost:8501). Para conferir a estrela diretamente no contêiner, execute:
 
    ```console
@@ -142,6 +138,8 @@ Medição local em Windows com CPython 3.14.4, 534 documentos e 4.645 termos. Pa
 **Validação em 25/11/2026.** Executamos o projeto no Windows via WSL 2, Docker Engine 29.9.3 e Compose 5.7.0. O Airflow apresentou as duas DAGs após o login. A ingestão diária carregou 17 matérias de 24/11/2026. A coleta manual de janeiro de 2025 trouxe 534 matérias em seis páginas e seu evento acionou a consolidação. Repetimos a mesma janela. As duas DAGs concluíram com sucesso novamente e a segunda carga processou zero alterações. O verificador encontrou 551 matérias na bronze e 551 fatos, com zero pendências e zero violações de chave estrangeira. A consulta lunar lander retornou resultados e benchmark no painel servido pelo contêiner.
 
 ### Reproduzir sem contêineres
+
+Com Python 3.11 ou superior, execute na raiz do projeto. Após o último comando, abra [o painel](http://localhost:8501).
 
 ```console
 python -m src.pipeline ingest --start 2025-01-01 --end 2025-02-01
