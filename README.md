@@ -139,7 +139,7 @@ Medição local em Windows com CPython 3.14.4, 534 documentos e 4.645 termos. Pa
 
 6. Encerre a pilha com `docker compose down`. Os volumes nomeados são reutilizados na próxima subida.
 
-**Validação nesta entrega.** A configuração foi aceita por Docker Compose v2.35.1. A máquina de desenvolvimento não tinha Docker Engine nem WSL instalado. A execução dos contêineres e a demonstração das duas DAGs na UI precisam ser verificadas em uma máquina com Docker. Coleta, carga, repetição da janela, consultas SQL, índices e atendimento HTTP do painel foram executados localmente.
+**Validação em 25/11/2026.** Executamos o projeto no Windows via WSL 2, Docker Engine 29.9.3 e Compose 5.7.0. O Airflow apresentou as duas DAGs após o login. A ingestão diária carregou 17 matérias de 24/11/2026. A coleta manual de janeiro de 2025 trouxe 534 matérias em seis páginas e seu evento acionou a consolidação. Repetimos a mesma janela. As duas DAGs concluíram com sucesso novamente e a segunda carga processou zero alterações. O verificador encontrou 551 matérias na bronze e 551 fatos, com zero pendências e zero violações de chave estrangeira. A consulta lunar lander retornou resultados e benchmark no painel servido pelo contêiner.
 
 ### Reproduzir sem contêineres
 
