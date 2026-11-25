@@ -1,0 +1,80 @@
+x-airflow: &airflow
+  image: apache/airflow:2.10.5-python3.11
+  environment: &env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__WEBSERVER__SECRET_KEY: observatorio-apenas-local
+    PYTHONPATH: /opt/airflow/project
+    OBS_DB: /opt/airflow/data/observatorio.db
+  volumes:
+    - ./dags:/opt/airflow/dags:ro
+    - ./src:/opt/airflow/project/src:ro
+    - dados:/opt/airflow/data
+    - logs:/opt/airflow/logs
+  depends_on:
+    init:
+      condition: service_completed_successfully
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - metadados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  init:
+    <<: *airflow
+    user: "0:0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: /bin/bash
+    command:
+      - -ec
+      - |
+        chown 50000:0 /opt/airflow/data /opt/airflow/logs
+        exec /entrypoint airflow version
+    environment:
+      <<: *env
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: observatorio
+  webserver:
+    <<: *airflow
+    command: webserver
+    ports: ["127.0.0.1:8080:8080"]
+  scheduler:
+    <<: *airflow
+    command: scheduler
+  triggerer:
+    <<: *airflow
+    command: triggerer
+  painel:
+    image: python:3.11-slim
+    user: "50000:0"
+    working_dir: /project
+    environment:
+      OBS_DB: /data/observatorio.db
+      OBS_HOST: 0.0.0.0
+    volumes:
+      - ./src:/project/src:ro
+      - ./app:/project/app:ro
+      - dados:/data
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    command: python -m app.painel
+    ports: ["127.0.0.1:8501:8501"]
+volumes:
+  dados:
+  logs:
+  metadados:
+

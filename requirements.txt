@@ -1,0 +1,3 @@
+# ETL, busca e painel usam exclusivamente a biblioteca padrão Python.
+# A imagem oficial do Compose fornece Airflow 2.10.5 e o driver do PostgreSQL.
+
